@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Augmented Recon & Attack Surface Analyser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="background-glow"></div>
+
+    <header class="app-header">
+        <div class="brand">
+            <div class="logo-icon">🛡️</div>
+            <div>
+                <h1>AI-Recon <span class="accent-text">Platform</span></h1>
+                <p class="subtitle">Attack Surface Enumeration • RAG Knowledge Base • MITRE ATT&CK Mapping</p>
+            </div>
+        </div>
+        <div class="system-badges" id="systemBadges">
+            <span class="badge badge-success"><span class="dot pulse"></span> FAISS RAG: Active</span>
+            <span class="badge badge-info" id="providerBadge">LLM Engine: Checking...</span>
+            <span class="badge badge-warning">Prompt Guard: Enforced</span>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Scan Initiation Section -->
+        <section class="scan-panel glass-card">
+            <h2>Start Reconnaissance Assessment</h2>
+            <form id="scanForm" class="scan-form">
+                <div class="input-group">
+                    <label for="targetInput">Target Hostname or IP</label>
+                    <input type="text" id="targetInput" placeholder="e.g., demo.target.local, localhost, or scanme.nmap.org" value="demo.target.local" required>
+                </div>
+                
+                <div class="input-group profile-group">
+                    <label for="scanType">Scan Profile</label>
+                    <select id="scanType">
+                        <option value="quick">Quick Scan (Top Ports + Web Headers + DNS)</option>
+                        <option value="full" selected>Full Deep Scan (Comprehensive Modules + SSL Check)</option>
+                    </select>
+                </div>
+
+                <div class="modules-group">
+                    <label>Active Modules:</label>
+                    <div class="checkbox-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="module" value="dns" checked> DNS / Subdomains
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="module" value="port" checked> TCP Service Scan
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="module" value="web_headers" checked> Web / Header Security
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="scanBtn">
+                    <span class="btn-icon">⚡</span> Run AI-Augmented Scan
+                </button>
+            </form>
+        </section>
+
+        <!-- Loading state -->
+        <div id="loadingIndicator" class="loading-container hidden">
+            <div class="loader-spinner"></div>
+            <p id="loaderMessage">Enumerating active services across target ports...</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- Scan Results Overview -->
+        <section id="resultsSection" class="results-section hidden">
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <span class="stat-label">Total Discoveries</span>
+                    <span class="stat-value" id="statFindingsCount">0</span>
+                </div>
+                <div class="stat-card glass-card">
+                    <span class="stat-label">Neutralized Injections</span>
+                    <span class="stat-value text-warning" id="statInjectionsCount">0</span>
+                </div>
+                <div class="stat-card glass-card">
+                    <span class="stat-label">RAG Citations Retrieved</span>
+                    <span class="stat-value text-accent" id="statCitationsCount">0</span>
+                </div>
+                <div class="stat-card glass-card">
+                    <span class="stat-label">Scan Duration</span>
+                    <span class="stat-value" id="statDuration">0.0s</span>
+                </div>
+            </div>
+
+            <!-- Executive Summary Banner -->
+            <div class="exec-summary-panel glass-card" id="execSummaryPanel">
+                <div class="summary-left">
+                    <div class="risk-gauge" id="riskGaugeContainer">
+                        <div class="gauge-circle" id="gaugeCircle">
+                            <span class="gauge-score" id="gaugeScore">0.0</span>
+                            <span class="gauge-max">/ 10</span>
+                        </div>
+                        <span class="gauge-tier badge" id="gaugeTierBadge">UNKNOWN</span>
+                    </div>
+                </div>
+                <div class="summary-right">
+                    <h3>Executive AI Risk Summary</h3>
+                    <p class="exec-text" id="execSummaryText">Scan to generate risk assessment.</p>
+                    
+                    <div class="summary-columns">
+                        <div class="summary-col">
+                            <h4>Key Attack Vectors Identified</h4>
+                            <ul id="execAttackVectors"></ul>
+                        </div>
+                        <div class="summary-col">
+                            <h4>Critical Remediation Priorities</h4>
+                            <ul id="execRecommendations"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-nav">
+                <button class="tab-btn active" data-tab="tab-vulnerabilities">Detailed Findings & Remediation (<span id="tabCountVulns">0</span>)</button>
+                <button class="tab-btn" data-tab="tab-mitre">MITRE ATT&CK Mapping (<span id="tabCountMitre">0</span>)</button>
+                <button class="tab-btn" data-tab="tab-rag-explorer">FAISS RAG Knowledge Explorer</button>
+            </div>
+
+            <!-- Tab 1: Detailed Vulnerabilities & Remediation -->
+            <div class="tab-content active" id="tab-vulnerabilities">
+                <div class="vulns-list" id="vulnsListContainer">
+                    <!-- Cards injected by app.js -->
+                </div>
+            </div>
+
+            <!-- Tab 2: MITRE ATT&CK Matrix -->
+            <div class="tab-content" id="tab-mitre">
+                <div class="mitre-grid" id="mitreGridContainer">
+                    <!-- MITRE cards injected by app.js -->
+                </div>
+            </div>
+
+            <!-- Tab 3: RAG Explorer -->
+            <div class="tab-content" id="tab-rag-explorer">
+                <div class="rag-search-bar glass-card">
+                    <h3>Semantic Vector Search against FAISS Security Knowledge Base</h3>
+                    <p class="search-desc">Search across embedded MITRE ATT&CK tactics, CVE vulnerability definitions, and OWASP Top 10 guidelines.</p>
+                    <div class="rag-input-row">
+                        <input type="text" id="ragSearchInput" placeholder="e.g., 'OpenSSH regreSSHion', 'T1190', or 'Missing HSTS'" value="OpenSSH">
+                        <button class="btn-secondary" id="ragSearchBtn">Semantic Search</button>
+                    </div>
+                </div>
+                <div class="rag-results-grid" id="ragResultsContainer">
+                    <!-- RAG citation cards injected by app.js -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>Built with <span class="accent-text">Python FastAPI</span>, <span class="accent-text">RAG (FAISS)</span>, and <span class="accent-text">MITRE ATT&CK</span>. Secure AI Principles Enforced.</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

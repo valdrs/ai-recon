@@ -43,3 +43,8 @@ ai recon/
    ```
 4. **Access the Dashboard:**
    Open `http://localhost:8000` in your web browser.
+
+## Project Status
+
+🚧 Under active development
+   
